@@ -240,6 +240,14 @@ func (i *Injector) Clone() *Injector {
 	return i.CloneWithOpts(&InjectorOpts{})
 }
 
+func (i *Injector) DirectlyClone() *Injector {
+	return &Injector{
+		services:               i.services,
+		orderedInvocation:      i.orderedInvocation,
+		orderedInvocationIndex: i.orderedInvocationIndex,
+	}
+}
+
 // CloneWithOpts clones injector with provided services but not with invoked instances, with options.
 func (i *Injector) CloneWithOpts(opts *InjectorOpts) *Injector {
 	clone := NewWithOpts(opts)
