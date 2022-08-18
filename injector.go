@@ -240,7 +240,7 @@ func (i *Injector) Clone() *Injector {
 	return i.CloneWithOpts(&InjectorOpts{})
 }
 
-func (i *Injector) DirectlyClone() *Injector {
+func (i *Injector) Scope() *Injector {
 	return &Injector{
 		services:               i.services,
 		orderedInvocation:      i.orderedInvocation,
