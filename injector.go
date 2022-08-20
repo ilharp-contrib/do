@@ -241,11 +241,16 @@ func (i *Injector) Clone() *Injector {
 }
 
 func (i *Injector) Scope() *Injector {
-	return &Injector{
-		services:               i.services,
-		orderedInvocation:      i.orderedInvocation,
-		orderedInvocationIndex: i.orderedInvocationIndex,
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+
+	scope := New()
+
+	for name, service := range i.services {
+		scope.services[name] = service
 	}
+
+	return scope
 }
 
 // CloneWithOpts clones injector with provided services but not with invoked instances, with options.
