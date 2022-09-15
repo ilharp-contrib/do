@@ -63,6 +63,31 @@ import (
 Then instanciate services:
 
 ```go
+func main() {
+    injector := do.New()
+
+    // provides CarService
+    do.Provide(injector, NewCarService)
+
+    // provides EngineService
+    do.Provide(injector, NewEngineService)
+
+    car := do.MustInvoke[*CarService](injector)
+    car.Start()
+    // prints "car starting"
+
+    do.HealthCheck[EngineService](injector)
+    // returns "engine broken"
+
+    // injector.ShutdownOnSIGTERM()    // will block until receiving sigterm signal
+    injector.Shutdown()
+    // prints "car stopped"
+}
+```
+
+Services:
+
+```go
 type EngineService interface{}
 
 func NewEngineService(i *do.Injector) (EngineService, error) {
@@ -99,31 +124,48 @@ func (c *CarService) Shutdown() error {
 }
 ```
 
-```go
-func main() {
-    injector := do.New()
-
-    // provides CarService
-    do.Provide(injector, NewCarService)
-
-    // provides EngineService
-    do.Provide(injector, NewEngineService)
-
-    car := do.MustInvoke[*CarService](injector)
-    car.Start()
-    // prints "car starting"
-
-    do.HealthCheck[EngineService](injector)
-    // returns "engine broken"
-
-    injector.Shutdown()
-    // prints "car stopped"
-}
-```
-
 ## 🤠 Spec
 
 [GoDoc: https://godoc.org/github.com/samber/do](https://godoc.org/github.com/samber/do)
+
+Injector:
+
+- [do.New](https://pkg.go.dev/github.com/samber/do#New)
+- [do.NewWithOpts](https://pkg.go.dev/github.com/samber/do#NewWithOpts)
+  - [injector.Clone](https://pkg.go.dev/github.com/samber/do#injector.Clone)
+  - [injector.CloneWithOpts](https://pkg.go.dev/github.com/samber/do#injector.CloneWithOpts)
+  - [injector.HealthCheck](https://pkg.go.dev/github.com/samber/do#injector.HealthCheck)
+  - [injector.Shutdown](https://pkg.go.dev/github.com/samber/do#injector.Shutdown)
+  - [injector.ShutdownOnSIGTERM](https://pkg.go.dev/github.com/samber/do#injector.ShutdownOnSIGTERM)
+  - [injector.ListProvidedServices](https://pkg.go.dev/github.com/samber/do#injector.ListProvidedServices)
+  - [injector.ListInvokedServices](https://pkg.go.dev/github.com/samber/do#injector.ListInvokedServices)
+- [do.HealthCheck](https://pkg.go.dev/github.com/samber/do#HealthCheck)
+- [do.HealthCheckNamed](https://pkg.go.dev/github.com/samber/do#HealthCheckNamed)
+- [do.Shutdown](https://pkg.go.dev/github.com/samber/do#Shutdown)
+- [do.ShutdownNamed](https://pkg.go.dev/github.com/samber/do#ShutdownNamed)
+- [do.MustShutdown](https://pkg.go.dev/github.com/samber/do#MustShutdown)
+- [do.MustShutdownNamed](https://pkg.go.dev/github.com/samber/do#MustShutdownNamed)
+
+Service registration:
+
+- [do.Provide](https://pkg.go.dev/github.com/samber/do#Provide)
+- [do.ProvideNamed](https://pkg.go.dev/github.com/samber/do#ProvideNamed)
+- [do.ProvideNamedValue](https://pkg.go.dev/github.com/samber/do#ProvideNamedValue)
+- [do.ProvideValue](https://pkg.go.dev/github.com/samber/do#ProvideValue)
+
+Service invocation:
+
+- [do.Invoke](https://pkg.go.dev/github.com/samber/do#Invoke)
+- [do.MustInvoke](https://pkg.go.dev/github.com/samber/do#MustInvoke)
+- [do.InvokeNamed](https://pkg.go.dev/github.com/samber/do#InvokeNamed)
+- [do.MustInvokeNamed](https://pkg.go.dev/github.com/samber/do#MustInvokeNamed)
+
+Service override:
+
+- [do.Override](https://pkg.go.dev/github.com/samber/do#Override)
+- [do.OverrideNamed](https://pkg.go.dev/github.com/samber/do#OverrideNamed)
+- [do.OverrideNamedValue](https://pkg.go.dev/github.com/samber/do#OverrideNamedValue)
+- [do.OverrideValue](https://pkg.go.dev/github.com/samber/do#OverrideValue)
 
 ### Injector (DI container)
 
@@ -384,6 +426,10 @@ injector := do.NewWithOpts(&do.InjectorOpts{
     HookAfterShutdown: func(injector *do.Injector, serviceName string) {
         fmt.Printf("Service stopped: %s\n", serviceName)
     },
+
+    Logf: func(format string, args ...any) {
+        log.Printf(format, args...)
+    }
 })
 ```
 
